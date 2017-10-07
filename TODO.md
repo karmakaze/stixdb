@@ -1,0 +1,22 @@
+TODO
+
+- database of tables
+- drop table
+- delete row
+- schema change: add/delete/change row
+- IN
+- <, <=, >, >=
+- BETWEEN _ AND _
+- EXISTS (...)
+- AND/OR
+- UPDATE
+- JOIN (INNER, LEFT/RIGHT, OUTER)
+- DISTINCT
+- LIMIT
+- UNION
+- GROUP BY, aggregate functions(COUNT, MIN, MAX)
+- HAVING
+- ORDER BY
+- shared values (either within column or globally)
+- indexing (sorted map: column value -> rows)
+- schema change: add/drop index
