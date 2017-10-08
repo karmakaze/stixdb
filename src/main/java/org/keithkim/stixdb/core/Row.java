@@ -1,19 +1,26 @@
 package org.keithkim.stixdb.core;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.unmodifiableList;
 
 public class Row {
     protected final Object[] values;
 
-    protected Row(Object... values) {
+    protected Row(Value... values) {
         if (values == null) {
             this.values = new Object[] { null };
         } else {
-            this.values = values;
+            this.values = new Object[values.length];
+            int i = 0;
+            for (Value value : values) {
+                this.values[i] = value.value;
+                i++;
+            }
         }
     }
 
@@ -36,8 +43,12 @@ public class Row {
         }
     }
 
+    public List<Object> values() {
+        return unmodifiableList(asList(values));
+    }
+
     public List<Object> values(int... columns) {
-        return asList(valuesArray(columns));
+        return unmodifiableList(asList(valuesArray(columns)));
     }
 
     protected Object[] valuesArray(int... columns) {
@@ -57,10 +68,6 @@ public class Row {
         } catch (IndexOutOfBoundsException cause) {
             throw new StixException("Column index "+ i +" out of range");
         }
-    }
-
-    public List<Object> values() {
-        return asList(values);
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.util.*;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static org.keithkim.stixdb.core.Values.values;
 
 public class Table {
     private final LinkedHashMap<Column.Name, Integer> columnIndex;
@@ -55,7 +56,7 @@ public class Table {
             throw new StixException("Incorrect number of column values");
         }
         if (values != null && values.length == columnIndex.size()) {
-            Row row = new Row(values);
+            Row row = new Row(values(values));
             rows.add(row);
             return Optional.of(row);
         }

@@ -12,18 +12,18 @@ public class Join {
         List<OnCond> onColCol = new ArrayList<OnCond>();
 
         for (OnCond onCond : on) {
-            Object onLeft = onCond.left();
-            Object onRight = onCond.right();
+            NameOrValue onLeft = onCond.leftNameOrValue;
+            NameOrValue onRight = onCond.rightNameOrValue;
 
-            if (onLeft instanceof Column.Name) {
-                if (onRight instanceof Column.Name) {
+            if (onLeft.isName()) {
+                if (onRight.isName()) {
                     onColCol.add(onCond);
                 } else {
-                    leftValued.put((Column.Name) onLeft, right);
+                    leftValued.put(onLeft.name(), onRight.value());
                 }
             } else {
-                if (onRight instanceof Column.Name) {
-                    leftValued.put((Column.Name) onRight, onLeft);
+                if (onRight.isName()) {
+                    rightValued.put(onRight.name(), onLeft.value());
                 } else {
                     throw new StixException("ON value = value condition is invalid (use where)");
                 }
@@ -36,8 +36,8 @@ public class Join {
             right = right.select(rightValued);
         }
 
-        int[] onLeftIndices = left.columnIndices(onColCol.stream().map(c -> (Column.Name) c.left()).collect(Collectors.toList()));
-        int[] onRightIndices = right.columnIndices(onColCol.stream().map(c -> (Column.Name) c.right()).collect(Collectors.toList()));
+        int[] onLeftIndices = left.columnIndices(onColCol.stream().map(c -> c.leftName()).collect(Collectors.toList()));
+        int[] onRightIndices = right.columnIndices(onColCol.stream().map(c -> c.rightName()).collect(Collectors.toList()));
 
         List<Column.Name> allColumns = new ArrayList<>(left.columnNames("a"));
         allColumns.addAll(right.columnNames("b"));
@@ -55,14 +55,35 @@ public class Join {
         return result;
     }
 
-    public static abstract class OnCond {
-        abstract Object left();
-        abstract Object right();
+    public static class OnCond {
+        private final NameOrValue leftNameOrValue;
+        private final NameOrValue rightNameOrValue;
+
+        protected OnCond(NameOrValue left, NameOrValue right) {
+            this.leftNameOrValue = left;
+            this.rightNameOrValue = right;
+        }
+
+        public Column.Name leftName() {
+            return leftNameOrValue.name();
+        }
+
+        public Object leftValue() {
+            return leftNameOrValue.value();
+        }
+
+        public Column.Name rightName() {
+            return rightNameOrValue.name();
+        }
+
+        public Object rightValue() {
+            return rightNameOrValue.value();
+        }
 
         @Override
         public int hashCode() {
-            int result = left().hashCode();
-            result = 31 * result + right().hashCode();
+            int result = leftNameOrValue.hashCode();
+            result = 31 * result + rightNameOrValue.hashCode();
             return result;
         }
 
@@ -71,71 +92,17 @@ public class Join {
             if (this == o) return true;
             if (o == null || o.getClass() != getClass()) return false;
 
-            OnColColCond that = (OnColColCond) o;
+            OnCond that = (OnCond) o;
 
-            if (!left().equals(that.left())) return false;
-            if (!right().equals(that.right())) return false;
+            if (!Objects.equals(leftNameOrValue, that.leftNameOrValue)) return false;
+            if (!Objects.equals(rightNameOrValue, that.rightNameOrValue)) return false;
 
             return true;
         }
 
         @Override
         public String toString() {
-            return "OnCond{" + left() + " = " + right() + "}";
-        }
-    }
-
-    public static class OnColColCond extends OnCond {
-        private final Column.Name leftCol;
-        private final Column.Name rightCol;
-
-        public OnColColCond(Column.Name left, Column.Name right) {
-            this.leftCol = left;
-            this.rightCol = right;
-        }
-
-        public Column.Name left() {
-            return leftCol;
-        }
-
-        public Column.Name right() {
-            return rightCol;
-        }
-    }
-
-    public static class OnColValCond extends OnCond {
-        private final Column.Name leftCol;
-        private final Object rightVal;
-
-        public OnColValCond(Column.Name leftCol, Object rightVal) {
-            this.leftCol = leftCol;
-            this.rightVal = rightVal;
-        }
-
-        public Column.Name left() {
-            return leftCol;
-        }
-
-        public Object right() {
-            return rightVal;
-        }
-    }
-
-    public static class OnValColCond extends OnCond {
-        private final Object leftVal;
-        private final Column.Name rightCol;
-
-        public OnValColCond(Object leftVal, Column.Name rightCol) {
-            this.leftVal = leftVal;
-            this.rightCol = rightCol;
-        }
-
-        public Object left() {
-            return leftVal;
-        }
-
-        public Column.Name right() {
-            return rightCol;
+            return "OnCond{" + leftNameOrValue + " = " + rightNameOrValue + "}";
         }
     }
 }

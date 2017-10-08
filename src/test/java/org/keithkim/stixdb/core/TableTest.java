@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.keithkim.stixdb.core.Values.values;
 
 public class TableTest {
     @Test
@@ -62,7 +63,7 @@ public class TableTest {
         assertThat(result.rowCount()).describedAs("rowCount").isEqualTo(2);
         List<Row> rows = result.rows();
         assertThat(rows).describedAs("rows").hasSize(2);
-        assertThat(rows).describedAs("rows").containsExactlyInAnyOrder(new Row("a", 1f), new Row("b", 2f));
+        assertThat(rows).describedAs("rows").containsExactlyInAnyOrder(new Row(values("a", 1f)), new Row(values("b", 2f)));
     }
 
     @Test
@@ -77,6 +78,6 @@ public class TableTest {
         assertThat(result.rowCount()).describedAs("rowCount").isEqualTo(1);
         List<Row> rows = result.rows();
         assertThat(rows).describedAs("rows").hasSize(1);
-        assertThat(rows).describedAs("rows").containsExactlyInAnyOrder(new Row("a", 1f));
+        assertThat(rows).describedAs("rows").containsExactlyInAnyOrder(new Row(values("a", 1f)));
     }
 }
