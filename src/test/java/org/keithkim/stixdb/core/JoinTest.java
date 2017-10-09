@@ -103,9 +103,8 @@ public class JoinTest {
                 RowValues.with(values("b", 2L, "b", 2L, 2.1f)));
     }
 
-
     @Test
-    public void innerJoinWithIndex_returnsPairsOfMatchingRows() throws Exception {
+    public void innerJoinWithLeftIndexBefore_returnsPairsOfMatchingRows() throws Exception {
         Table a = Table.ofSizeWithColumns("x", "y");
         a.addIndex(Column.name("x"));
         Optional<RowValues> a1 = a.addRow("a", 1L);
@@ -114,21 +113,51 @@ public class JoinTest {
         Table b = Table.ofSizeWithColumns("first", "second", "third");
         Optional<RowValues> b1 = b.addRow("a", 1L, 1.0f);
         Optional<RowValues> b2 = b.addRow("b", 2L, 2.0f);
-        Optional<RowValues> b2n = b.addRow("b", 2L, -2.0f);
+        Optional<RowValues> b21 = b.addRow("b", 2L, 2.1f);
+        Optional<RowValues> b22 = b.addRow("b", 22L, 2.2f);
         Optional<RowValues> b3 = b.addRow("c", 3L, 3.0f);
 
-        Table result = Join.inner(a, b, Set.of(new OnCond(ofName(Column.name("x")), ofName(Column.name("first"))),
-                new OnCond(ofName(Column.name("y")), ofName(Column.name("second")))));
+        Table result = Join.inner(a, b, Set.of(new OnCond(ofName(Column.name("x")), ofName(Column.name("first")))));
 
         assertThat(result).isNotNull();
         assertThat(result.columnCount()).describedAs("columnCount").isEqualTo(5);
         assertThat(result.columnNames()).isEqualTo(Column.names("a.x", "a.y", "b.first", "b.second", "b.third"));
-        assertThat(result.rowCount()).describedAs("rowCount").isEqualTo(3);
+        assertThat(result.rowCount()).describedAs("rowCount").isEqualTo(4);
         List<RowValues> rows = result.rows();
-        assertThat(rows).describedAs("rows").hasSize(3);
+        assertThat(rows).describedAs("rows").hasSize(4);
         assertThat(rows).describedAs("rows").containsExactlyInAnyOrder(
                 RowValues.with(values("a", 1L, "a", 1L, 1.0f)),
                 RowValues.with(values("b", 2L, "b", 2L, 2.0f)),
-                RowValues.with(values("b", 2L, "b", 2L, -2.0f)));
+                RowValues.with(values("b", 2L, "b", 2L, 2.1f)),
+                RowValues.with(values("b", 2L, "b", 22L, 2.2f)));
+    }
+
+    @Test
+    public void innerJoinWithRightIndexAfter_returnsPairsOfMatchingRows() throws Exception {
+        Table a = Table.ofSizeWithColumns("x", "y");
+        Optional<RowValues> a1 = a.addRow("a", 1L);
+        Optional<RowValues> a2 = a.addRow("b", 2L);
+
+        Table b = Table.ofSizeWithColumns("first", "second", "third");
+        Optional<RowValues> b1 = b.addRow("a", 1L, 1.0f);
+        Optional<RowValues> b2 = b.addRow("b", 2L, 2.0f);
+        Optional<RowValues> b21 = b.addRow("b", 2L, 2.1f);
+        Optional<RowValues> b22 = b.addRow("b", 22L, 2.2f);
+        Optional<RowValues> b3 = b.addRow("c", 3L, 3.0f);
+        b.addIndex(Column.name("first"));
+
+        Table result = Join.inner(a, b, Set.of(new OnCond(ofName(Column.name("x")), ofName(Column.name("first")))));
+
+        assertThat(result).isNotNull();
+        assertThat(result.columnCount()).describedAs("columnCount").isEqualTo(5);
+        assertThat(result.columnNames()).isEqualTo(Column.names("a.x", "a.y", "b.first", "b.second", "b.third"));
+        assertThat(result.rowCount()).describedAs("rowCount").isEqualTo(4);
+        List<RowValues> rows = result.rows();
+        assertThat(rows).describedAs("rows").hasSize(4);
+        assertThat(rows).describedAs("rows").containsExactlyInAnyOrder(
+                RowValues.with(values("a", 1L, "a", 1L, 1.0f)),
+                RowValues.with(values("b", 2L, "b", 2L, 2.0f)),
+                RowValues.with(values("b", 2L, "b", 2L, 2.1f)),
+                RowValues.with(values("b", 2L, "b", 22L, 2.2f)));
     }
 }

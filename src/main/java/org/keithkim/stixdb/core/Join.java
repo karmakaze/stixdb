@@ -44,14 +44,52 @@ public class Join {
 
         Table result = Table.ofSizeWithColumns(allColumns);
 
-        for (RowValues leftRow : left.rows()) {
-            RowValues leftCondValues = leftRow.select(onLeftColumns);
+        char useIndex = ' ';
+        if (onLeftColumns.length == 1 && left.isIndexed(onLeftColumns[0])) {
+            if (onRightColumns.length == 1 && right.isIndexed(onRightColumns[0])) {
+                // index on both
+                if (left.rowCount() > right.rowCount()) {
+                    useIndex = 'L';
+                } else {
+                    useIndex = 'R';
+                }
+            } else {
+                useIndex = 'L';
+            }
+        } else if (onRightColumns.length == 1 && right.isIndexed(onRightColumns[0])) {
+            useIndex = 'R';
+        }
 
+        if (useIndex == 'L') {
+            int column = onLeftColumns[0];
             for (RowValues rightRow : right.rows()) {
                 RowValues rightCondValues = rightRow.select(onRightColumns);
 
-                if (leftCondValues.equals(rightCondValues)) {
+                List<RowValues> leftRows = left.rowsWithIndexValue(column, rightCondValues.value(0));
+                for (RowValues leftRow : leftRows) {
                     result.addRow(RowValues.concat(leftRow, rightRow));
+                }
+            }
+        } else if (useIndex == 'R') {
+            int column = onRightColumns[0];
+            for (RowValues leftRow : left.rows()) {
+                RowValues leftCondValues = leftRow.select(onLeftColumns);
+
+                List<RowValues> rightRows = right.rowsWithIndexValue(column, leftRow.value(onLeftColumns[0]));
+                for (RowValues rightRow : rightRows) {
+                    result.addRow(RowValues.concat(leftRow, rightRow));
+                }
+            }
+        } else {
+            for (RowValues leftRow : left.rows()) {
+                RowValues leftCondValues = leftRow.select(onLeftColumns);
+
+                for (RowValues rightRow : right.rows()) {
+                    RowValues rightCondValues = rightRow.select(onRightColumns);
+
+                    if (leftCondValues.equals(rightCondValues)) {
+                        result.addRow(RowValues.concat(leftRow, rightRow));
+                    }
                 }
             }
         }

@@ -8,6 +8,8 @@ import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+import static java.util.Collections.emptyList;
+
 public class Index<T extends Comparable<T>> {
     protected final int column;
     protected NavigableMap<T, List<RowValues>> valueRows = new ConcurrentSkipListMap<>();
@@ -25,6 +27,15 @@ public class Index<T extends Comparable<T>> {
             valueRows.put(value, rows);
         }
         rows.add(row);
+    }
+
+    public int cardinality() {
+        return nullValuedRows.isEmpty() ? valueRows.size() : valueRows.size() + 1;
+    }
+
+    public List<RowValues> rowsWithIndexValue(Object value) {
+        List<RowValues> rows = valueRows.get((T) value);
+        return rows == null ? emptyList() : rows;
     }
 
     public static class Name extends org.keithkim.stixdb.core.Name {

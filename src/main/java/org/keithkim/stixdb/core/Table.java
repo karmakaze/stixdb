@@ -66,6 +66,26 @@ public class Table {
         }
     }
 
+    public boolean isIndexed(int column) {
+        return indexes.get(column) != null;
+    }
+
+    public int indexCardinality(int column) {
+        Index index = indexes.get(column);
+        if (index == null) {
+            return rows.size();
+        }
+        return index.cardinality();
+    }
+
+    public List<RowValues> rowsWithIndexValue(int column, Object value) {
+        Index index = indexes.get(column);
+        if (index == null) {
+            throw new StixException("rowsWithIndexValue called on non-indexed column");
+        }
+        return index.rowsWithIndexValue(value);
+    }
+
     public int columnCount() {
         return columnIndex.size();
     }
