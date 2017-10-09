@@ -1,10 +1,10 @@
-package org.keithkim.stixdb.core;
+package org.keithkim.stixdb.core.util;
+
+import org.keithkim.stixdb.core.StixException;
 
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAmount;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 public class Values {
     public static Value[] values(Object... values) {

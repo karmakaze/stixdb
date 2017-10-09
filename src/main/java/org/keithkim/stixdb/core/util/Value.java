@@ -1,7 +1,5 @@
-package org.keithkim.stixdb.core;
+package org.keithkim.stixdb.core.util;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAmount;
 import java.util.Date;

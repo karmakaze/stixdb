@@ -1,5 +1,12 @@
+DONE
+
+- use lists of arrays for zero-copy concatenation (ArraysList)
+- use column number mapping for zero-copy subset/reorder of values (RowValues)
+- INNER JOIN
+
 TODO
 
+- indexing (sorted map: column value -> rows)
 - database of tables
 - drop table
 - delete row
@@ -10,7 +17,7 @@ TODO
 - EXISTS (...)
 - AND/OR
 - UPDATE
-- JOIN (INNER, LEFT/RIGHT, OUTER)
+/ JOIN (INNER, LEFT/RIGHT, OUTER)
 - DISTINCT
 - LIMIT
 - UNION
@@ -18,5 +25,5 @@ TODO
 - HAVING
 - ORDER BY
 - shared values (either within column or globally)
-- indexing (sorted map: column value -> rows)
+- constraints: primary keys, foreign keys
 - schema change: add/drop index

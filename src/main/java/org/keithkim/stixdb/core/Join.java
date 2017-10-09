@@ -1,5 +1,7 @@
 package org.keithkim.stixdb.core;
 
+import org.keithkim.stixdb.core.util.RowValues;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,19 +38,22 @@ public class Join {
             right = right.select(rightValued);
         }
 
-        int[] onLeftIndices = left.columnIndices(onColCol.stream().map(c -> c.leftName()).collect(Collectors.toList()));
-        int[] onRightIndices = right.columnIndices(onColCol.stream().map(c -> c.rightName()).collect(Collectors.toList()));
+        short[] onLeftColumns = left.columnIndices(onColCol.stream().map(c -> c.leftName()).collect(Collectors.toList()));
+        short[] onRightColumns = right.columnIndices(onColCol.stream().map(c -> c.rightName()).collect(Collectors.toList()));
 
         List<Column.Name> allColumns = new ArrayList<>(left.columnNames("a"));
         allColumns.addAll(right.columnNames("b"));
 
-        Table result = Table.ofSizeWithColumns(0, allColumns);
+        Table result = Table.ofSizeWithColumns(allColumns);
 
-        for (Row leftRow : left.rows()) {
-            List<Object> leftCondValues = asList(leftRow.valuesArray(onLeftIndices));
-            for (Row rightRow : right.rows()) {
-                if (rightRow.matches(onRightIndices, leftCondValues)) {
-                    result.addRow(Rows.concat(leftRow.values, rightRow.values));
+        for (RowValues leftRow : left.rows()) {
+            RowValues leftCondValues = leftRow.select(onLeftColumns);
+            for (RowValues rightRow : right.rows()) {
+                if (onRightColumns.length != leftCondValues.size()) {
+                    System.out.println("onRightColumns.length != leftCondValues.size()");
+                }
+                if (rightRow.matches(onRightColumns, leftCondValues)) {
+                    result.addRow(RowValues.concat(leftRow, rightRow));
                 }
             }
         }
