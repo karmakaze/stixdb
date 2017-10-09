@@ -9,10 +9,22 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentSkipListMap;
 
 public class Index<T extends Comparable<T>> {
-    private NavigableMap<T, List<RowValues>> valueRows = new ConcurrentSkipListMap<>();
-    private List<RowValues> nullValuedRows = new ArrayList<>();
+    protected final int column;
+    protected NavigableMap<T, List<RowValues>> valueRows = new ConcurrentSkipListMap<>();
+    protected List<RowValues> nullValuedRows = new ArrayList<>();
 
-    protected Index() {
+    protected Index(int column) {
+        this.column = column;
+    }
+
+    public void rowAdded(RowValues row) {
+        T value = (T) row.value(column);
+        List<RowValues> rows = valueRows.get(value);
+        if (rows == null) {
+            rows = new ArrayList<>();
+            valueRows.put(value, rows);
+        }
+        rows.add(row);
     }
 
     public static class Name extends org.keithkim.stixdb.core.Name {

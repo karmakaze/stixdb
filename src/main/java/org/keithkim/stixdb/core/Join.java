@@ -5,8 +5,6 @@ import org.keithkim.stixdb.core.util.RowValues;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static java.util.Arrays.asList;
-
 public class Join {
     public static Table inner(Table left, Table right, Set<OnCond> on) {
         Map<Column.Name, Object> leftValued = new HashMap<>();
@@ -14,8 +12,8 @@ public class Join {
         List<OnCond> onColCol = new ArrayList<OnCond>();
 
         for (OnCond onCond : on) {
-            NameOrValue onLeft = onCond.leftNameOrValue;
-            NameOrValue onRight = onCond.rightNameOrValue;
+            Column.NameOrValue onLeft = onCond.leftNameOrValue;
+            Column.NameOrValue onRight = onCond.rightNameOrValue;
 
             if (onLeft.isName()) {
                 if (onRight.isName()) {
@@ -48,11 +46,11 @@ public class Join {
 
         for (RowValues leftRow : left.rows()) {
             RowValues leftCondValues = leftRow.select(onLeftColumns);
+
             for (RowValues rightRow : right.rows()) {
-                if (onRightColumns.length != leftCondValues.size()) {
-                    System.out.println("onRightColumns.length != leftCondValues.size()");
-                }
-                if (rightRow.matches(onRightColumns, leftCondValues)) {
+                RowValues rightCondValues = rightRow.select(onRightColumns);
+
+                if (leftCondValues.equals(rightCondValues)) {
                     result.addRow(RowValues.concat(leftRow, rightRow));
                 }
             }
@@ -61,10 +59,10 @@ public class Join {
     }
 
     public static class OnCond {
-        private final NameOrValue leftNameOrValue;
-        private final NameOrValue rightNameOrValue;
+        private final Column.NameOrValue leftNameOrValue;
+        private final Column.NameOrValue rightNameOrValue;
 
-        protected OnCond(NameOrValue left, NameOrValue right) {
+        protected OnCond(Column.NameOrValue left, Column.NameOrValue right) {
             this.leftNameOrValue = left;
             this.rightNameOrValue = right;
         }

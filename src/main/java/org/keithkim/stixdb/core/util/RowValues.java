@@ -55,6 +55,10 @@ public class RowValues {
         this.indices = indices;
     }
 
+    public Object value(int column) {
+        return indices == null ? values.get(column) : values.get(indices[column]);
+    }
+
     public ArraysList<Object> values() {
         return values;
     }
@@ -126,26 +130,6 @@ public class RowValues {
             return new RowValues(newValues, null);
         }
         return new RowValues(newValues, newIndices);
-    }
-
-    public boolean matches(short[] whereColumns, RowValues whereValues) {
-        int i = 0;
-        if (indices == null) {
-            for (Object whereValue : whereValues.values()) {
-                if (!Objects.equals(values.get(whereColumns[i]), whereValue)) {
-                    return false;
-                }
-                i++;
-            }
-        } else {
-            for (Object whereValue : whereValues.values()) {
-                if (!Objects.equals(values.get(indices[whereColumns[i]]), whereValue)) {
-                    return false;
-                }
-                i++;
-            }
-        }
-        return true;
     }
 
     @Override

@@ -1,4 +1,4 @@
-package org.keithkim.stixdb.core;
+package org.keithkim.stixdb.core.util;
 
 import org.junit.Test;
 import org.keithkim.stixdb.core.util.ArraysList;

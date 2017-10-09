@@ -12,7 +12,8 @@ import static org.keithkim.stixdb.core.util.Values.values;
 
 public class Table {
     private final LinkedHashMap<Column.Name, Short> columnIndex;
-    private final ArrayList<RowValues> rows;
+    private final List<RowValues> rows;
+    private final Map<Integer, Index> indexes;
 
     public static Table ofSizeWithColumns() {
         return new Table(emptyList());
@@ -44,7 +45,25 @@ public class Table {
             columnIndex.put(columnName, index);
             index++;
         }
-        rows = new ArrayList<RowValues>();
+        rows = new ArrayList<>();
+        indexes = new HashMap<>();
+    }
+
+    public void addIndex(Column.Name columnName) {
+        short i = columnIndex.get(columnName);
+        addIndex(i);
+    }
+
+    public void addIndex(int column) {
+        Index index = indexes.get(column);
+        if (index == null) {
+            index = new Index(column);
+            indexes.put(column, index);
+
+            for (RowValues row : rows) {
+                index.rowAdded(row);
+            }
+        }
     }
 
     public int columnCount() {
@@ -55,12 +74,14 @@ public class Table {
         return rows.size();
     }
 
-    public Optional<RowValues> addRow(RowValues row) {
+    public void addRow(RowValues row) {
         if (row.size() != columnIndex.size()) {
             throw new StixException("Incorrect number of column rowValues");
         }
         rows.add(row);
-        return Optional.of(row);
+        for (Index index : indexes.values()) {
+            index.rowAdded(row);
+        }
     }
 
     public Optional<RowValues> addRow(Object... values) {
@@ -69,7 +90,7 @@ public class Table {
         }
         if (values != null && values.length == columnIndex.size()) {
             RowValues row = RowValues.with(values(values));
-            rows.add(row);
+            addRow(row);
             return Optional.of(row);
         }
         return Optional.empty();
@@ -119,7 +140,7 @@ public class Table {
             whereValues = RowValues.with(values);
         }
         for (RowValues row : rows) {
-            if (whereIndices == null || row.matches(whereIndices, whereValues)) {
+            if (whereIndices == null || row.select(whereIndices).equals(whereValues)) {
                 table.addRow(row.select(indices));
             }
         }
